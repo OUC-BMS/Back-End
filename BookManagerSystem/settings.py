@@ -11,16 +11,17 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
-
+import json
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+BASE_CONFIG_DIR = os.path.join(BASE_DIR, "config.json")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
-
+with open(BASE_CONFIG_DIR) as f:
+    CONFIG = json.load(f)
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '99q&^q#j$xy@koiqnz%rge+5vvq*w85*!m4k51c^2@^6r*lxh^'
+SECRET_KEY = CONFIG.get("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -37,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "bms",
+    "APPS.bms",
 ]
 
 MIDDLEWARE = [

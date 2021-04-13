@@ -4,10 +4,11 @@ from django.db import models
 
 
 class Student(models.Model):
-    student_id = models.CharField(max_length=12, verbose_name="学号", unique=True)
-    student_name = models.CharField(max_length=12, verbose_name="姓名")
-    borrow_max = models.PositiveIntegerField(verbose_name="最大借阅数")
-    borrow_now = models.IntegerField(verbose_name="已借阅数")
+    student_id = models.CharField(max_length=30, verbose_name="学号", unique=True)
+    student_name = models.CharField(max_length=30, verbose_name="姓名")
+    student_pwd = models.CharField(max_length=30, verbose_name="密码")
+    borrow_max = models.IntegerField(verbose_name="最大借阅数", default=30)
+    borrow_now = models.IntegerField(verbose_name="已借阅数", default=0)
 
 
 class Book(models.Model):
