@@ -8,4 +8,6 @@ class ResponseState(Enum):
     UNEXPECTED_ERROR = (50000, '意外错误')
     REQUEST_METHOD_ERROR = (40000, '请求方法错误')
     JSON_DECODE_ERROR = (40001, 'JSON 解析错误')
+    PARAMETER_LACK_ERROR = (46001, '缺少参数')
+    PARAMETER_TYPE_ERROR = (46002, '参数类型错误')
     NOT_LOGIN = (44001, '未登陆')

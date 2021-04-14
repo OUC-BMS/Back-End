@@ -5,5 +5,5 @@ class BaseValidator(metaclass=ABCMeta):
 
     @classmethod
     @abstractmethod
-    def validate(cls, raw_string):
+    def validate(cls, raw_string, *args, **kwargs):
         pass

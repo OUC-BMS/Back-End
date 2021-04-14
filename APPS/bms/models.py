@@ -15,7 +15,7 @@ class Book(models.Model):
     book_name = models.CharField(max_length=256, verbose_name="书名")
     author = models.CharField(max_length=256, verbose_name="作者")
     press = models.CharField(max_length=256, verbose_name="出版社")
-    borrow_status = models.BooleanField(verbose_name="借阅状态")
+    borrow_status = models.BooleanField(verbose_name="借阅状态", default=1)
 
 
 class BorrowLog(models.Model):

@@ -29,6 +29,8 @@ class AccountResponseState(ResponseState):
 
 
 class BMSResponseState(ResponseState):
+    VALIDATE_OK = (20000, '验证通过')
+
     BOOK_BORROW_NUM_EXCEEDED_ERROR = (46000, "超过最大借阅书籍数")
     INVALID_BOOK_BORROW_ERROR = (46001, "无效的借阅操作")
     INVALID_BOOK_RETURN_ERROR = (46002, "无效的归还操作")
