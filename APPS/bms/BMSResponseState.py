@@ -18,10 +18,10 @@ class AccountResponseState(ResponseState):
     PASSWORD_LACK_NUMBER_ERROR = (42007, '密码必须包含数字')
     PASSWORD_LACK_LETTER_ERROR = (42008, '密码必须包含字母')
 
-    USERNAME_EXISTED_ERROR = (43001, '用户名已存在')
+    USER_EXISTED_ERROR = (43001, '用户名已存在')
     EMAIL_EXISTED_ERROR = (43002, '邮箱已存在')
 
-    USERNAME_NOT_EXISTED_ERROR = (43003, '用户名不存在')
+    USER_NOT_EXISTED_ERROR = (43003, '用户名不存在')
     PASSWORD_NOT_MATCH_ERROR = (43004, '密码错误')
 
     PCODE_NOT_EXISTED_ERROR = (43005, '学号未注册')
@@ -32,6 +32,7 @@ class BMSResponseState(ResponseState):
     VALIDATE_OK = (20000, '验证通过')
 
     BOOK_BORROW_NUM_EXCEEDED_ERROR = (46000, "超过最大借阅书籍数")
+    NOT_ENOUGH_BOOK_ERROR = (46006, "没有可借阅的书籍")
     INVALID_BOOK_BORROW_ERROR = (46001, "无效的借阅操作")
     INVALID_BOOK_RETURN_ERROR = (46002, "无效的归还操作")
     INVALID_BOOK_ORDER_ERROR = (46003, "无效的预约操作")
