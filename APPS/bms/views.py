@@ -100,12 +100,19 @@ def login(request):
     return JsonResponse(AccountResponseState.OK, data)
 
 
-# TODO: 修改为 Json数据接口
 def register(request):
-    username = request.POST.get("name")
-    p_code = request.POST.get("userid")
-    pwd = request.POST.get("password")
-
+    json_data = json.loads(request.body.decode('utf-8'))
+    required_fields = [
+        ("name", str),
+        ("userid", str),
+        ("pwd", str)
+    ]
+    state = JsonDataValidator.validate(json_data, required_fields)
+    if state != AccountResponseState.VALIDATE_OK:
+        return JsonResponse(state)
+    username = json_data["name"]
+    p_code = json_data["userid"]
+    pwd = json_data["pwd"]
     state = UsernameValidator.validate(username)
     if state != AccountResponseState.VALIDATE_OK:
         return JsonResponse(state)
@@ -161,9 +168,10 @@ def bms(request):
         return JsonResponse(AccountResponseState.REQUEST_METHOD_ERROR)
 
 
+@login_required
 def u_info(request):
     if request.method == "GET":
-        u_id = request.GET.get("user_id", None)
+        u_id = request.session.get("id")
         stu = Student.objects.get(student_id=u_id).defer("student_pwd")
         data = {
             "data": stu.model_to_dict()
@@ -182,7 +190,7 @@ def book_checkout(request):
         ]
         state = JsonDataValidator.validate(json_data, required_fields=required_fields)
         if state == BMSResponseState.VALIDATE_OK:
-            user_id = json_data["user_id"]
+            user_id = request.session.get("id")
             book_id = json_data["book_id"]
             user = Student.objects.get(student_id=user_id)
             if user.borrow_max == user.borrow_max:
@@ -198,11 +206,48 @@ def book_checkout(request):
             book.available -= 1
             user.save()
             book.save()
+            if BorrowLog.objects.exists(student=user, book=book, status=0):
+                # 曾经预约过, 更新状态
+                BorrowLog.objects.get(student=user, book=book, status=0).update(status=1, borrow_time=timezone.now())
+            else:
+                new_borrow_log = BorrowLog(
+                    student=user,
+                    book=book,
+                    status=1,
+                    borrow_time=timezone.now()
+                )
+                new_borrow_log.save()
+            return JsonResponse(BMSResponseState.OK)
+        else:
+            return JsonResponse(state)
+    else:
+        return JsonResponse(BMSResponseState.REQUEST_METHOD_ERROR)
+
+
+@login_required
+def book_appointment(request):
+    if request.method == "POST":
+        json_data = json.loads(request.body.decode('utf-8'))
+        required_fields = [
+            ("book_id", str),
+        ]
+        state = JsonDataValidator.validate(json_data, required_fields=required_fields)
+        if state == BMSResponseState.VALIDATE_OK:
+            user_id = request.session.get("id")
+            book_id = json_data["book_id"]
+            user = Student.objects.get(student_id=user_id)
+            if not Book.objects.exists(book_id=book_id):
+                return JsonResponse(BMSResponseState.INVALID_BOOK_BORROW_ERROR)
+
+            book = Book.objects.get(book_id=book_id)
+            user.borrow_now += 1
+            book.available -= 1
+            user.save()
+            book.save()
             new_borrow_log = BorrowLog(
                 student=user,
                 book=book,
-                status=1,
-                borrow_time=timezone.now()
+                order_time=timezone.now()
             )
             new_borrow_log.save()
             return JsonResponse(BMSResponseState.OK)
@@ -213,13 +258,31 @@ def book_checkout(request):
 
 
 @login_required
-def booK_appointment(request):
-    pass
-
-
-@login_required
 def book_return(request):
-    pass
+    if request.method == "POST":
+        json_data = json.loads(request.body.decode('utf-8'))
+        required_fields = [
+            ("book_id", str),
+        ]
+        state = JsonDataValidator.validate(json_data, required_fields=required_fields)
+        if state == BMSResponseState.VALIDATE_OK:
+            user_id = request.session.get("id")
+            book_id = json_data["book_id"]
+            user = Student.objects.get(student_id=user_id)
+            if not BorrowLog.objects.exists(book_id=book_id, student=user, status=1):
+                return JsonResponse(BMSResponseState.INVALID_BOOK_BORROW_ERROR)
+
+            book = Book.objects.get(book_id=book_id)
+            user.borrow_now -= 1
+            book.available += 1
+            user.save()
+            book.save()
+            BorrowLog.objects.get(book_id=book_id, student=user, status=1).update(giveback_time=timezone.now(), status=2)
+            return JsonResponse(BMSResponseState.OK)
+        else:
+            return JsonResponse(state)
+    else:
+        return JsonResponse(BMSResponseState.REQUEST_METHOD_ERROR)
 
 
 @login_required
