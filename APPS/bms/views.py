@@ -6,11 +6,11 @@ from django.contrib.auth.hashers import make_password, check_password
 from django.db.models import Q
 from django.forms.models import model_to_dict
 
-from models import Student, Book, BorrowLog
+from APPS.bms.models import Student, Book, BorrowLog
 from APPS.utils.http import JsonResponse
-from BMSResponseState import AccountResponseState, BMSResponseState
+from APPS.bms.BMSResponseState import AccountResponseState, BMSResponseState
 from APPS.utils.validator import BaseValidator
-from decorator import login_required
+from APPS.bms.decorator import login_required
 
 
 class UsernameValidator(BaseValidator):
@@ -49,7 +49,7 @@ class PcodeValidator(BaseValidator):
     def validate(cls, p_code, *args, **kwargs):
         if len(p_code) != 11 or not re.match("[0-9]+", p_code):
             return AccountResponseState.PCODE_FORMAT_ERROR
-        if Student.objects.exists(student_id=p_code):
+        if Student.objects.filter(student_id=p_code).exists():
             return AccountResponseState.USER_EXISTED_ERROR
         return AccountResponseState.VALIDATE_OK
 
@@ -73,18 +73,15 @@ class JsonDataValidator(BaseValidator):
 
 
 def login(request):
-    p_code = request.POST.get("pcode")
-    pwd = request.POST.get("password")
-
-    state = PcodeValidator.validate(p_code)
-    if state != AccountResponseState.VALIDATE_OK:
-        return JsonResponse(state)
+    json_data = json.loads(request.body.decode("utf-8"))
+    p_code = json_data["name"]
+    pwd = json_data["pwd"]
 
     state = PWDValidator.validate(pwd)
     if state != AccountResponseState.VALIDATE_OK:
         return JsonResponse(state)
 
-    if not Student.objects.exists(student_id=p_code):
+    if not Student.objects.filter(student_id=p_code).exists():
         return JsonResponse(AccountResponseState.PCODE_NOT_EXISTED_ERROR)
 
     stu = Student.objects.get(student_id=p_code)
@@ -101,32 +98,36 @@ def login(request):
 
 
 def register(request):
-    json_data = json.loads(request.body.decode('utf-8'))
-    required_fields = [
-        ("name", str),
-        ("userid", str),
-        ("pwd", str)
-    ]
-    state = JsonDataValidator.validate(json_data, required_fields)
-    if state != AccountResponseState.VALIDATE_OK:
-        return JsonResponse(state)
-    username = json_data["name"]
-    p_code = json_data["userid"]
-    pwd = json_data["pwd"]
-    state = UsernameValidator.validate(username)
-    if state != AccountResponseState.VALIDATE_OK:
-        return JsonResponse(state)
-    state = PWDValidator.validate(pwd)
-    if state != AccountResponseState.VALIDATE_OK:
-        return JsonResponse(state)
-    state = PcodeValidator.validate(p_code)
-    if state != AccountResponseState.VALIDATE_OK:
-        return JsonResponse(state)
-    usr = Student(student_id=p_code,
-                  student_name=username,
-                  student_pwd=make_password(pwd))
-    usr.save()
-    return JsonResponse(AccountResponseState.OK)
+    if request.method == "POST":
+        json_data = json.loads(request.body.decode('utf-8'))
+        required_fields = [
+            ("name", str),
+            ("userid", str),
+            ("pwd", str)
+        ]
+        # state = JsonDataValidator.validate(json_data, required_fields=required_fields)
+        # if state != AccountResponseState.VALIDATE_OK:
+        #     return JsonResponse(state)
+        username = json_data["name"]
+        p_code = json_data["userid"]
+        pwd = json_data["pwd"]
+        state = UsernameValidator.validate(username)
+        if state != AccountResponseState.VALIDATE_OK:
+            return JsonResponse(state)
+        state = PWDValidator.validate(pwd)
+        if state != AccountResponseState.VALIDATE_OK:
+            return JsonResponse(state)
+        state = PcodeValidator.validate(p_code)
+        if state != AccountResponseState.VALIDATE_OK:
+            return JsonResponse(state)
+
+        usr = Student.objects.create(student_id=p_code,
+                                     student_name=username,
+                                     student_pwd=make_password(pwd))
+        usr.save()
+        return JsonResponse(AccountResponseState.OK)
+    else:
+        return JsonResponse(AccountResponseState.REQUEST_METHOD_ERROR)
 
 
 def bms(request):
@@ -195,7 +196,7 @@ def book_checkout(request):
             user = Student.objects.get(student_id=user_id)
             if user.borrow_max == user.borrow_max:
                 return JsonResponse(BMSResponseState.BOOK_BORROW_NUM_EXCEEDED_ERROR)
-            if not Book.objects.exists(book_id=book_id):
+            if not Book.objects.filter(book_id=book_id).exists():
                 return JsonResponse(BMSResponseState.INVALID_BOOK_BORROW_ERROR)
 
             # 合法的数据
@@ -206,11 +207,11 @@ def book_checkout(request):
             book.available -= 1
             user.save()
             book.save()
-            if BorrowLog.objects.exists(student=user, book=book, status=0):
+            if BorrowLog.objects.filter(student=user, book=book, status=0).exists():
                 # 曾经预约过, 更新状态
                 BorrowLog.objects.get(student=user, book=book, status=0).update(status=1, borrow_time=timezone.now())
             else:
-                new_borrow_log = BorrowLog(
+                new_borrow_log = BorrowLog.objects.create(
                     student=user,
                     book=book,
                     status=1,
@@ -236,7 +237,7 @@ def book_appointment(request):
             user_id = request.session.get("id")
             book_id = json_data["book_id"]
             user = Student.objects.get(student_id=user_id)
-            if not Book.objects.exists(book_id=book_id):
+            if not Book.objects.filter(book_id=book_id).exists():
                 return JsonResponse(BMSResponseState.INVALID_BOOK_BORROW_ERROR)
 
             book = Book.objects.get(book_id=book_id)
@@ -244,7 +245,7 @@ def book_appointment(request):
             book.available -= 1
             user.save()
             book.save()
-            new_borrow_log = BorrowLog(
+            new_borrow_log = BorrowLog.objects.create(
                 student=user,
                 book=book,
                 order_time=timezone.now()
@@ -269,7 +270,7 @@ def book_return(request):
             user_id = request.session.get("id")
             book_id = json_data["book_id"]
             user = Student.objects.get(student_id=user_id)
-            if not BorrowLog.objects.exists(book_id=book_id, student=user, status=1):
+            if not BorrowLog.objects.filter(book_id=book_id, student=user, status=1).exists():
                 return JsonResponse(BMSResponseState.INVALID_BOOK_BORROW_ERROR)
 
             book = Book.objects.get(book_id=book_id)

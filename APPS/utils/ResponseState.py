@@ -2,6 +2,7 @@ from enum import Enum
 
 
 class ResponseState(Enum):
+
     DEBUG = (10000, 'Debug')
     OK = (20000, '成功')
     FORBIDDEN = (50403, 'Forbidden')

@@ -1,7 +1,20 @@
+from enum import Enum
+
 from APPS.utils import ResponseState
 
 
-class AccountResponseState(ResponseState):
+class AccountResponseState(Enum):
+    # 枚举类继承存在问题
+    DEBUG = (10000, 'Debug')
+    OK = (20000, '成功')
+    FORBIDDEN = (50403, 'Forbidden')
+    UNEXPECTED_ERROR = (50000, '意外错误')
+    REQUEST_METHOD_ERROR = (40000, '请求方法错误')
+    JSON_DECODE_ERROR = (40001, 'JSON 解析错误')
+    PARAMETER_LACK_ERROR = (46001, '缺少参数')
+    PARAMETER_TYPE_ERROR = (46002, '参数类型错误')
+    NOT_LOGIN = (44001, '未登陆')
+
 
     VALIDATE_OK = (20000, '验证通过')
 
@@ -28,7 +41,18 @@ class AccountResponseState(ResponseState):
     PCODE_FORMAT_ERROR = (43006, '学号格式错误')
 
 
-class BMSResponseState(ResponseState):
+class BMSResponseState(Enum):
+
+    DEBUG = (10000, 'Debug')
+    OK = (20000, '成功')
+    FORBIDDEN = (50403, 'Forbidden')
+    UNEXPECTED_ERROR = (50000, '意外错误')
+    REQUEST_METHOD_ERROR = (40000, '请求方法错误')
+    JSON_DECODE_ERROR = (40001, 'JSON 解析错误')
+    PARAMETER_LACK_ERROR = (46001, '缺少参数')
+    PARAMETER_TYPE_ERROR = (46002, '参数类型错误')
+    NOT_LOGIN = (44001, '未登陆')
+
     VALIDATE_OK = (20000, '验证通过')
 
     BOOK_BORROW_NUM_EXCEEDED_ERROR = (46000, "超过最大借阅书籍数")

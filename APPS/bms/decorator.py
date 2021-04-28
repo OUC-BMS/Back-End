@@ -1,6 +1,6 @@
 from functools import wraps
 from APPS.utils.http import JsonResponse
-from BMSResponseState import AccountResponseState
+from APPS.bms.BMSResponseState import AccountResponseState
 
 
 def login_required(func):
