@@ -1,10 +1,7 @@
 from enum import Enum
 
-from APPS.utils import ResponseState
 
-
-class AccountResponseState(Enum):
-    # 枚举类继承存在问题
+class ResponseState(Enum):
     DEBUG = (10000, 'Debug')
     OK = (20000, '成功')
     FORBIDDEN = (50403, 'Forbidden')
@@ -14,10 +11,10 @@ class AccountResponseState(Enum):
     PARAMETER_LACK_ERROR = (46001, '缺少参数')
     PARAMETER_TYPE_ERROR = (46002, '参数类型错误')
     NOT_LOGIN = (44001, '未登陆')
-
-
     VALIDATE_OK = (20000, '验证通过')
 
+
+class AccountResponseState(Enum):
     USERNAME_REQUIRED_ERROR = (41002, '缺少用户名')
     PASSWORD_REQUIRED_ERROR = (41003, '缺少密码')
     EMAIL_REQUIRED_ERROR = (41004, '缺少邮箱')
@@ -42,24 +39,13 @@ class AccountResponseState(Enum):
 
 
 class BMSResponseState(Enum):
-
-    DEBUG = (10000, 'Debug')
-    OK = (20000, '成功')
-    FORBIDDEN = (50403, 'Forbidden')
-    UNEXPECTED_ERROR = (50000, '意外错误')
-    REQUEST_METHOD_ERROR = (40000, '请求方法错误')
-    JSON_DECODE_ERROR = (40001, 'JSON 解析错误')
-    PARAMETER_LACK_ERROR = (46001, '缺少参数')
-    PARAMETER_TYPE_ERROR = (46002, '参数类型错误')
-    NOT_LOGIN = (44001, '未登陆')
-
-    VALIDATE_OK = (20000, '验证通过')
-
     BOOK_BORROW_NUM_EXCEEDED_ERROR = (46000, "超过最大借阅书籍数")
-    NOT_ENOUGH_BOOK_ERROR = (46006, "没有可借阅的书籍")
+
     INVALID_BOOK_BORROW_ERROR = (46001, "无效的借阅操作")
     INVALID_BOOK_RETURN_ERROR = (46002, "无效的归还操作")
     INVALID_BOOK_ORDER_ERROR = (46003, "无效的预约操作")
     INVALID_BOOK_ADD_ERROR = (46004, "无效的增加操作")
     INVALID_BOOK_DELETE_ERROR = (46005, "无效的删除操作")
+    NOT_ENOUGH_BOOK_ERROR = (46006, "没有可借阅的书籍")
+    QUERY_EMPTY_ERROR = (46007, "未指定查询内容")
 
