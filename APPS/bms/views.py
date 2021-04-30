@@ -73,28 +73,31 @@ class JsonDataValidator(BaseValidator):
 
 
 def login(request):
-    json_data = json.loads(request.body.decode("utf-8"))
-    p_code = json_data["name"]
-    pwd = json_data["pwd"]
+    if request.method == "POST":
+        json_data = json.loads(request.body.decode("utf-8"))
+        p_code = json_data["name"]
+        pwd = json_data["pwd"]
 
-    state = PWDValidator.validate(pwd)
-    if state != ResponseState.VALIDATE_OK:
-        return JsonResponse(state)
+        state = PWDValidator.validate(pwd)
+        if state != ResponseState.VALIDATE_OK:
+            return JsonResponse(state)
 
-    if not Student.objects.filter(student_id=p_code).exists():
-        return JsonResponse(AccountResponseState.PCODE_NOT_EXISTED_ERROR)
+        if not Student.objects.filter(student_id=p_code).exists():
+            return JsonResponse(AccountResponseState.PCODE_NOT_EXISTED_ERROR)
 
-    stu = Student.objects.get(student_id=p_code)
-    if not check_password(pwd, stu.student_pwd):
-        return JsonResponse(AccountResponseState.PASSWORD_NOT_MATCH_ERROR)
-    data = {
-        "data": {
-            "username": stu.student_name,
-            "userid": stu.student_id
+        stu = Student.objects.get(student_id=p_code)
+        if not check_password(pwd, stu.student_pwd):
+            return JsonResponse(AccountResponseState.PASSWORD_NOT_MATCH_ERROR)
+        data = {
+            "data": {
+                "username": stu.student_name,
+                "userid": stu.student_id
+            }
         }
-    }
-    request.session["id"] = p_code
-    return JsonResponse(ResponseState.OK, data)
+        request.session["id"] = p_code
+        return JsonResponse(ResponseState.OK, data)
+    else:
+        return JsonResponse(ResponseState.REQUEST_METHOD_ERROR)
 
 
 def register(request):
