@@ -46,6 +46,6 @@ class BMSResponseState(Enum):
     INVALID_BOOK_ORDER_ERROR = (46003, "无效的预约操作")
     INVALID_BOOK_ADD_ERROR = (46004, "无效的增加操作")
     INVALID_BOOK_DELETE_ERROR = (46005, "无效的删除操作")
-    NOT_ENOUGH_BOOK_ERROR = (46006, "没有可借阅的书籍")
+    NOT_ENOUGH_BOOK_ERROR = (46006, "没有足够的可借阅的书籍")
     QUERY_EMPTY_ERROR = (46007, "未指定查询内容")
 

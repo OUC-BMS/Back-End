@@ -211,7 +211,10 @@ def book_checkout(request):
             book.save()
             if BorrowLog.objects.filter(student=user, book=book, status=0).exists():
                 # 曾经预约过, 更新状态
-                BorrowLog.objects.get(student=user, book=book, status=0).update(status=1, borrow_time=timezone.now())
+                book_log = BorrowLog.objects.get(student=user, book=book, status=0)
+                book_log.status = 1
+                book_log.borrow_time = timezone.now()
+                book_log.save()
             else:
                 new_borrow_log = BorrowLog.objects.create(
                     student=user,
@@ -240,13 +243,9 @@ def book_appointment(request):
             book_id = json_data["book_id"]
             user = Student.objects.get(student_id=user_id)
             if not Book.objects.filter(book_id=book_id).exists():
-                return JsonResponse(BMSResponseState.INVALID_BOOK_BORROW_ERROR)
+                return JsonResponse(BMSResponseState.INVALID_BOOK_ORDER_ERROR)
 
             book = Book.objects.get(book_id=book_id)
-            user.borrow_now += 1
-            book.available -= 1
-            user.save()
-            book.save()
             new_borrow_log = BorrowLog.objects.create(
                 student=user,
                 book=book,
@@ -272,15 +271,15 @@ def book_return(request):
             user_id = request.session.get("id")
             book_id = json_data["book_id"]
             user = Student.objects.get(student_id=user_id)
-            if not BorrowLog.objects.filter(book_id=book_id, student=user, status=1).exists():
-                return JsonResponse(BMSResponseState.INVALID_BOOK_BORROW_ERROR)
+            if not BorrowLog.objects.filter(book__book_id=book_id, student=user, status=1).exists():
+                return JsonResponse(BMSResponseState.INVALID_BOOK_RETURN_ERROR)
 
             book = Book.objects.get(book_id=book_id)
             user.borrow_now -= 1
             book.available += 1
             user.save()
             book.save()
-            BorrowLog.objects.get(book_id=book_id, student=user, status=1)\
+            BorrowLog.objects.filter(book__book_id=book_id, student=user, status=1)\
                 .update(giveback_time=timezone.now(), status=2)
             return JsonResponse(ResponseState.OK)
         else:
