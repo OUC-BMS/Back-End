@@ -8,8 +8,7 @@ def login_required(func):
     @wraps(func)
     def wrapper(request, *args, **kwargs):
         if request.session.get('id', None) is None:
-            request.session['id'] = "18020023001"
-            # return JsonResponse(ResponseState.NOT_LOGIN)
+            return JsonResponse(ResponseState.NOT_LOGIN)
 
         # 正常处理
         return func(request, *args, **kwargs)

@@ -130,6 +130,7 @@ def register(request):
         return JsonResponse(ResponseState.REQUEST_METHOD_ERROR)
 
 
+@login_required
 def bms(request):
     if request.method == "GET":
         query = request.GET.get("search")
