@@ -131,3 +131,4 @@ dmypy.json
 # Pycharms
 .idea
 config.json
+static/

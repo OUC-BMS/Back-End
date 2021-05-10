@@ -12,8 +12,10 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 import json
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 BASE_CONFIG_DIR = os.path.join(BASE_DIR, "config.json")
 
 # Quick-start development settings - unsuitable for production
@@ -27,7 +29,6 @@ SECRET_KEY = CONFIG.get("DJANGO_SECRET_KEY")
 DEBUG = True
 
 ALLOWED_HOSTS = [CONFIG.get("DJANGO_PROJECT_IP")]
-
 
 # Application definition
 
@@ -49,7 +50,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'APPS.bms.middleware.HttpOtherMethodMiddleware',
 ]
 
 ROOT_URLCONF = 'BookManagerSystem.urls'
@@ -57,7 +57,7 @@ ROOT_URLCONF = 'BookManagerSystem.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': os.path.join(BASE_DIR, 'templates')
+        'DIRS': []
         ,
         'APP_DIRS': True,
         'OPTIONS': {
@@ -73,7 +73,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'BookManagerSystem.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
@@ -83,7 +82,6 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -103,7 +101,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
@@ -117,8 +114,8 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
