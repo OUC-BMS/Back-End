@@ -6,6 +6,7 @@ urlpatterns = [
     path("usr/login", bms_views.login),
     path("usr/info", bms_views.u_info),
     path("book", bms_views.bms),
+    path("book/newbook", bms_views.book_add),
     path("book/checkout", bms_views.book_checkout),
     path("book/appointment", bms_views.book_appointment),
     path("book/return", bms_views.book_return),

@@ -19,7 +19,7 @@ class AccountResponseState(Enum):
     PASSWORD_REQUIRED_ERROR = (41003, '缺少密码')
     EMAIL_REQUIRED_ERROR = (41004, '缺少邮箱')
 
-    USERNAME_TOO_SHORT_ERROR = (42001, '用户名应不少于 2 位')
+    USERNAME_TOO_SHORT_ERROR = (42001, '用户名应不少于 1 位')
     USERNAME_TOO_LONG_ERROR = (42002, '用户名应不多于 20 位')
     USERNAME_FORMAT_ERROR = (42003, '用户名仅能含有字母、数字和下划线')
     PASSWORD_TOO_SHORT_ERROR = (42004, '密码应不少于 6 位')

@@ -17,7 +17,7 @@ class UsernameValidator(BaseValidator):
 
     @classmethod
     def validate(cls, username, *args, **kwargs):
-        if len(username) < 4:
+        if len(username) < 1:
             return AccountResponseState.USERNAME_TOO_SHORT_ERROR
         if len(username) > 30:
             return AccountResponseState.USERNAME_TOO_LONG_ERROR
@@ -72,6 +72,17 @@ class JsonDataValidator(BaseValidator):
         return ResponseState.VALIDATE_OK
 
 
+class StrLenValidator(BaseValidator):
+
+    @classmethod
+    def validate(cls, raw_string, *args, **kwargs):
+        if "max_length" in kwargs.keys():
+            max_length = kwargs["max_length"]
+        else:
+            max_length = 256
+        return len(raw_string) <= max_length
+
+
 def login(request):
     if request.method == "POST":
         json_data = json.loads(request.body.decode("utf-8"))
@@ -91,7 +102,8 @@ def login(request):
         data = {
             "data": {
                 "username": stu.student_name,
-                "userid": stu.student_id
+                "userid": stu.student_id,
+                "is_manager": stu.is_manager
             }
         }
         request.session["id"] = p_code
@@ -283,7 +295,7 @@ def book_return(request):
             book.available += 1
             user.save()
             book.save()
-            BorrowLog.objects.filter(book__book_id=book_id, student=user, status=1)\
+            BorrowLog.objects.filter(book__book_id=book_id, student=user, status=1) \
                 .update(giveback_time=timezone.now(), status=2)
             return JsonResponse(ResponseState.OK)
         else:
@@ -293,8 +305,59 @@ def book_return(request):
 
 
 @login_required
-def book_delete(request):
-    pass
+def book_add(request):
+    if request.method == "POST":
+        json_data = json.loads(request.body.decode('utf-8'))
+        if "book_id" not in json_data.keys():
+            return JsonResponse(BMSResponseState.INVALID_BOOK_ADD_ERROR)
+        else:
+            book_id = json_data["book_id"]
+            if Book.objects.filter(book_id=book_id).exists():
+                book = Book.objects.get(book_id=book_id)
+                required_fields = [
+                    ("book_num", int),
+                ]
+                state = JsonDataValidator.validate(json_data, required_fields=required_fields)
+                if state != ResponseState.VALIDATE_OK:
+                    return JsonResponse(state)
+                book_num = min(json_data["book_num"], 65536)
+                book.stock += book_num
+                book.save()
+                return JsonResponse(ResponseState.OK)
+            else:
+                required_fields = [
+                    ("book_name", str),
+                    ("book_author", str),
+                    ("book_press", str),
+                    ("book_num", int),
+                ]
+                state = JsonDataValidator.validate(json_data, required_fields=required_fields)
+                if state != ResponseState.VALIDATE_OK:
+                    return JsonResponse(state)
+                book_name = json_data["book_name"]
+                book_author = json_data["book_author"]
+                book_press = json_data["book_press"]
+                book_num = min(json_data["book_num"], 65536)
+                book_id = json_data["book_id"]
+
+                if len(book_name) > 256 \
+                        or len(book_author) > 256 \
+                        or len(book_press) > 256 \
+                        or len(book_id) > 256:
+                    return JsonResponse(BMSResponseState.INVALID_BOOK_ADD_ERROR)
+
+                new_book = Book.objects.create(
+                    book_id=book_id,
+                    book_name=book_name,
+                    press=book_press,
+                    stock=book_num,
+                    author=book_author
+                )
+                new_book.save()
+                return JsonResponse(ResponseState.OK)
+    else:
+        return JsonResponse(ResponseState.REQUEST_METHOD_ERROR)
+
 
 
 @login_required
