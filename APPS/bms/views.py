@@ -10,7 +10,7 @@ from APPS.bms.models import Student, Book, BorrowLog
 from APPS.utils.http import JsonResponse
 from APPS.bms.BMSResponseState import AccountResponseState, BMSResponseState, ResponseState
 from APPS.utils.validator import BaseValidator
-from APPS.bms.decorator import login_required
+from APPS.bms.decorator import login_required, manager_required
 
 
 class UsernameValidator(BaseValidator):
@@ -107,6 +107,7 @@ def login(request):
             }
         }
         request.session["id"] = p_code
+        request.session["manager"] = stu.is_manager
         return JsonResponse(ResponseState.OK, data)
     else:
         return JsonResponse(ResponseState.REQUEST_METHOD_ERROR)
@@ -304,7 +305,7 @@ def book_return(request):
         return JsonResponse(ResponseState.REQUEST_METHOD_ERROR)
 
 
-@login_required
+@manager_required
 def book_add(request):
     if request.method == "POST":
         json_data = json.loads(request.body.decode('utf-8'))
@@ -320,8 +321,9 @@ def book_add(request):
                 state = JsonDataValidator.validate(json_data, required_fields=required_fields)
                 if state != ResponseState.VALIDATE_OK:
                     return JsonResponse(state)
-                book_num = min(json_data["book_num"], 65536)
-                book.stock += book_num
+                book_num = min(json_data["book_num"], 0)
+                book_num = max(book_num, 65536)
+                book.stock = book_num
                 book.save()
                 return JsonResponse(ResponseState.OK)
             else:

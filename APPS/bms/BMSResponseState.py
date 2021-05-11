@@ -12,6 +12,7 @@ class ResponseState(Enum):
     PARAMETER_TYPE_ERROR = (46002, '参数类型错误')
     NOT_LOGIN = (44001, '未登陆')
     VALIDATE_OK = (20000, '验证通过')
+    AUTH_ERROR = (44003, '认证错误')
 
 
 class AccountResponseState(Enum):

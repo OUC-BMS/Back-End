@@ -16,6 +16,19 @@ def login_required(func):
     return wrapper
 
 
+def manager_required(func):
+
+    @wraps(func)
+    def wrapper(request, *args, **kwargs):
+        if not request.session.get('manager', None):
+            return JsonResponse(ResponseState.AUTH_ERROR)
+
+        # 正常处理
+        return func(request, *args, **kwargs)
+
+    return wrapper
+
+
 def allowed_method(methods):
     def decorator(func):
         def wrapper(request, *args, **kwargs):
