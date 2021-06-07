@@ -321,8 +321,8 @@ def book_add(request):
                 state = JsonDataValidator.validate(json_data, required_fields=required_fields)
                 if state != ResponseState.VALIDATE_OK:
                     return JsonResponse(state)
-                book_num = min(json_data["book_num"], 0)
-                book_num = max(book_num, 65536)
+                book_num = max(json_data["book_num"], 0)
+                book_num = min(book_num, 65536)
                 book.stock = book_num
                 book.save()
                 return JsonResponse(ResponseState.OK)
@@ -353,13 +353,13 @@ def book_add(request):
                     book_name=book_name,
                     press=book_press,
                     stock=book_num,
-                    author=book_author
+                    author=book_author,
+                    available=book_num
                 )
                 new_book.save()
                 return JsonResponse(ResponseState.OK)
     else:
         return JsonResponse(ResponseState.REQUEST_METHOD_ERROR)
-
 
 
 @login_required
