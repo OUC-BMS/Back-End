@@ -323,6 +323,7 @@ def book_add(request):
                     return JsonResponse(state)
                 book_num = max(json_data["book_num"], 0)
                 book_num = min(book_num, 65536)
+                book.available += (book_num - book.stock)
                 book.stock = book_num
                 book.save()
                 return JsonResponse(ResponseState.OK)
